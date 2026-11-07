@@ -1,0 +1,11 @@
+check:
+  image: node:24-alpine
+  script:
+    - npm ci
+    - npx svelte-kit sync
+    - npx svelte-check --output machine-verbose | npx svelte-check-reporter --output-file gl-codequality.json
+  artifacts:
+    # The report matters most when the check fails
+    when: always
+    reports:
+      codequality: gl-codequality.json

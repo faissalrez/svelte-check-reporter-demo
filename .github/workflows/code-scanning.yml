@@ -1,0 +1,30 @@
+name: Code scanning
+
+on:
+  # Pull requests are compared with the last analysis of main
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    # Demo only: each pull request shows one format, as you would pick one
+    if: github.event_name == 'push' || github.head_ref == 'code-scanning'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx svelte-kit sync
+      - run: npx svelte-check --output machine-verbose | npx svelte-check-reporter --format sarif --output-file svelte-check.sarif
+      - uses: github/codeql-action/upload-sarif@v4
+        # Upload the report even when svelte-check finds errors
+        if: ${{ !cancelled() }}
+        with:
+          sarif_file: svelte-check.sarif
+          category: svelte-check

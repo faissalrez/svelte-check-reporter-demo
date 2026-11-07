@@ -1,0 +1,18 @@
+name: Annotations
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    # Demo only: each pull request shows one format, as you would pick one
+    if: github.head_ref == 'annotations'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx svelte-kit sync
+      - run: npx svelte-check --output machine-verbose | npx svelte-check-reporter --format github
